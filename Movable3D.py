@@ -17,9 +17,6 @@ class Movable3D:
         
 
     def _initialize_route(self) -> None:
-        # np.random.seed(2023)
-        # self.start_position = np.random.random(3)
-        
         if not self.is_ground_movable:
             self.steps = np.random.uniform(0.0, self.max_step, size=(self.number_of_steps, 3))
         else:
@@ -40,7 +37,6 @@ class Movable3D:
         turn_duration = int(self.number_of_steps/50) if self.number_of_steps > 50 else 1
         for turn_start_time in turn_start_times:
             left_or_right = np.random.randint(0, 2)
-            # print('left' if left_or_right==0 else 'right')
             self.steps[turn_start_time:(turn_start_time + turn_duration), left_or_right] = 0.
             self.steps[turn_start_time:(turn_start_time + turn_duration), 1 - left_or_right] *= 3
             self.steps[turn_start_time:(turn_start_time + turn_duration), 2] = 0.

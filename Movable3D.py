@@ -27,7 +27,7 @@ class Movable3D:
         self._set_maximum_height()
     
 
-    def _insert_turns(self):
+    def _insert_turns(self) -> None:
         number_of_turns = np.random.randint(0, int(self.number_of_steps/100) if self.number_of_steps >= 100 else 0)
         
         if number_of_turns == 0:
@@ -42,6 +42,6 @@ class Movable3D:
             self.steps[turn_start_time:(turn_start_time + turn_duration), 2] = 0.
 
 
-    def _set_maximum_height(self):
+    def _set_maximum_height(self) -> None:
         stop_elevation_time = np.random.randint(0, int(self.number_of_steps/2))
         self.route[(stop_elevation_time + 1):, 2] = self.route[stop_elevation_time, 2]

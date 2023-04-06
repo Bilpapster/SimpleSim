@@ -21,16 +21,26 @@ class Simulator:
                              'target':{},
                              'UAV_ground_trace': {}}
         
+        self._initialize_plot_hanlder_UAV()
+        self._initialize_plot_hander_UAV_ground_trace()
+        self._initialize_plot_handler_target()
+
+
+    def _initialize_plot_hanlder_UAV(self) -> None:
         self.plot_handler['UAV']['color'] = mcolors.CSS4_COLORS['darkorchid']
         self.plot_handler['UAV']['linestyle'] = '-'
         self.plot_handler['UAV']['label'] = 'UAV'
         self.plot_handler['UAV']['alpha'] = 1
 
+    
+    def _initialize_plot_hander_UAV_ground_trace(self) -> None:
         self.plot_handler['UAV_ground_trace']['color'] = mcolors.CSS4_COLORS['slategrey']
         self.plot_handler['UAV_ground_trace']['linestyle'] = ':'
         self.plot_handler['UAV_ground_trace']['label'] = 'UAV ground trace'
         self.plot_handler['UAV_ground_trace']['alpha'] = 0.5
 
+    
+    def _initialize_plot_handler_target(self) -> None:
         self.plot_handler['target']['color'] = mcolors.CSS4_COLORS['lime']
         self.plot_handler['target']['linestyle'] = '--'
         self.plot_handler['target']['label'] = 'target'
@@ -46,17 +56,17 @@ class Simulator:
         ax = self.visualization.add_subplot(projection='3d')
         ax.set(xlim3d=(0, 300), xlabel='X')
         ax.set(ylim3d=(0, 300), ylabel='Y')
-        ax.set(zlim3d=(0, 300), zlabel='Z')
+        ax.set(zlim3d=(0, self.UAV.route[-1, 2] + 20), zlabel='Z')
         ax.set(title='SimpleSim v1.0')
 
         trajectories = [ax.plot([], [], [], 
-                                color=self.plot_handler[object_name]['color'],
-                                linestyle=self.plot_handler[object_name]['linestyle'], 
-                                alpha=self.plot_handler[object_name]['alpha'], 
-                                label=self.plot_handler[object_name]['label'])[0] for object_name in self.plot_handler]
+                                color=self.plot_handler[object]['color'],
+                                linestyle=self.plot_handler[object]['linestyle'], 
+                                alpha=self.plot_handler[object]['alpha'], 
+                                label=self.plot_handler[object]['label'])[0] for object in self.plot_handler]
 
         animated_plot = animation.FuncAnimation(
-            self.visualization, self._update_trajectories, self.UAV.number_of_steps, fargs=(self.routes, trajectories), interval=10,
+            self.visualization, self._update_trajectories, self.UAV.number_of_steps, fargs=(self.routes, trajectories), interval=10, repeat=False
         )
         plt.legend()
         plt.show()

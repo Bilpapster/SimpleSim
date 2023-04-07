@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import matplotlib.colors as mcolors
-from Movable3D import Movable3D
+from UAV import UAV
+from GroundTarget import GroundTarget
 
 class Simulator:
     def __init__(self, visualizationEnabled=True) -> None:
-        self.UAV = Movable3D()
-        self.target = Movable3D(is_ground_movable=True)
+        self.UAV = UAV()
+        self.target = GroundTarget()
         self.UAV_ground_trace_route = self.UAV.route.copy()
         self.UAV_ground_trace_route[:, 2] = 0
         self.routes = [self.UAV.route, self.target.route, self.UAV_ground_trace_route]
@@ -42,7 +43,7 @@ class Simulator:
     
     def _initialize_plot_handler_target(self) -> None:
         self.plot_handler['target']['color'] = mcolors.CSS4_COLORS['lime']
-        self.plot_handler['target']['linestyle'] = '--'
+        self.plot_handler['target']['linestyle'] = '-.'
         self.plot_handler['target']['label'] = 'target'
         self.plot_handler['target']['alpha'] = 1
 
@@ -68,7 +69,7 @@ class Simulator:
         animated_plot = animation.FuncAnimation(
             self.visualization, self._update_trajectories, self.UAV.number_of_steps, fargs=(self.routes, trajectories), interval=10, repeat=False
         )
-        plt.legend()
+        plt.legend(loc='best')
         plt.show()
 
     def _update_trajectories(self, current_number, walks, trajectories):

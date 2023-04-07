@@ -17,14 +17,8 @@ class Movable3D:
         
 
     def _initialize_route(self) -> None:
-        if not self.is_ground_movable:
-            self.steps = np.random.uniform(0.0, self.max_step, size=(self.number_of_steps, 3))
-        else:
-            self.steps = np.c_[(np.random.uniform(0.0, self.max_step, size=(self.number_of_steps, 2)), np.zeros((self.number_of_steps, 1)))]
-        
         self._insert_turns()
         self.route = self.start_position + np.cumsum(self.steps, axis=0)
-        self._set_maximum_height()
     
 
     def _insert_turns(self) -> None:

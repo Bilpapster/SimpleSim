@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import matplotlib.colors as mcolors
+import numpy as np
 from UAV import UAV
 from GroundTarget import GroundTarget
 
@@ -10,21 +11,28 @@ class Simulator:
         self.target = GroundTarget()
         self.UAV_ground_trace_route = self.UAV.route.copy()
         self.UAV_ground_trace_route[:, 2] = 0
-        self.routes = [self.UAV.route, self.target.route, self.UAV_ground_trace_route]
+
+        self.UAV_camera_FOV_route = self.UAV.route.copy()
+        self.UAV_camera_FOV_route[:, 1] -= np.tan(10* np.pi/180) * self.UAV_camera_FOV_route[:, 2]
+        self.UAV_camera_FOV_route[:, 2] = 0.
+
+        self.routes = [self.UAV.route, self.target.route, self.UAV_ground_trace_route, self.UAV_camera_FOV_route]
         self.visualizationEnabled = visualizationEnabled
         self.visualization = None
         self.plot_handler = None
         self._initialize_plot_handler()
 
-    
+
     def _initialize_plot_handler(self) -> None:
         self.plot_handler = {'UAV':{},
                              'target':{},
-                             'UAV_ground_trace': {}}
+                             'UAV_ground_trace': {},
+                             'UAV_camera_FOV': {}}
         
         self._initialize_plot_hanlder_UAV()
         self._initialize_plot_hander_UAV_ground_trace()
         self._initialize_plot_handler_target()
+        self._initialize_plot_handler_UAV_camera_FOV()
 
 
     def _initialize_plot_hanlder_UAV(self) -> None:
@@ -43,9 +51,16 @@ class Simulator:
     
     def _initialize_plot_handler_target(self) -> None:
         self.plot_handler['target']['color'] = mcolors.CSS4_COLORS['lime']
-        self.plot_handler['target']['linestyle'] = '-.'
+        self.plot_handler['target']['linestyle'] = (5, (10, 3)) # long dash with offset
         self.plot_handler['target']['label'] = 'target'
         self.plot_handler['target']['alpha'] = 1
+
+    
+    def _initialize_plot_handler_UAV_camera_FOV(self):
+        self.plot_handler['UAV_camera_FOV']['color'] = mcolors.CSS4_COLORS['firebrick']
+        self.plot_handler['UAV_camera_FOV']['linestyle'] = ':'
+        self.plot_handler['UAV_camera_FOV']['label'] = 'UAV camera FOV'
+        self.plot_handler['UAV_camera_FOV']['alpha'] = 0.8
 
 
     def visualize(self):

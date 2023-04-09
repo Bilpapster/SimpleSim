@@ -7,6 +7,12 @@ from matplotlib.patches import Circle
 from GroundTarget import GroundTarget
 from UAV import UAV
 
+# TO-DO: clean up code and split methods into smaller and simpler functions
+# TO-DO: make the radius of the FOV circle a parameter
+# TO-DO: study the Circle.contains() function to check whether it can be usefull in range queries
+# TO-DO: contruct a dictionary as API for flight data
+# TO-DO: film a screen cast video and send it to Vangelis
+
 class Simulator:
     def __init__(self, visualizationEnabled=True, UAV_camera_FOV_angle_degrees=150) -> None:
         self.visualizationEnabled = visualizationEnabled
@@ -108,6 +114,7 @@ class Simulator:
         )
         plt.legend(loc='best')
         plt.show()
+
 
     def _update_trajectories(self, current_number, walks, trajectories):
         for trajectory, route in zip(trajectories[:-1], self.routes):

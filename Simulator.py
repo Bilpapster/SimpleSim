@@ -80,10 +80,11 @@ class Simulator:
             return
 
         self.visualization = plt.figure(figsize=(8, 8))
-        ax = self.visualization.add_subplot(projection='3d')
-        ax.set(xlim3d=(0, 300), xlabel='X')
-        ax.set(ylim3d=(0, 300), ylabel='Y')
-        ax.set(zlim3d=(0, self.UAV.route[-1, 2] + 20), zlabel='Z')
+        ax = self.visualization.add_subplot(111, projection='3d')
+        ax.set(xlim3d=(0, self.UAV.route[-1, 0] + 10), xlabel='X')
+        ax.set(ylim3d=(0, self.UAV.route[-1, 1] + 10), ylabel='Y')
+        ax.set(zlim3d=(0, self.UAV.route[-1, 2] + 10), zlabel='Z')
+        # ax.set_axis_off()
         ax.set(title='SimpleSim v1.1')
 
         trajectories = [ax.plot([], [], [], 

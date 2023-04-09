@@ -87,7 +87,7 @@ class Simulator:
         self.ax.set(ylim3d=(0, self.UAV.route[-1, 1] + 10), ylabel='Y')
         self.ax.set(zlim3d=(0, self.UAV.route[-1, 2] + 10), zlabel='Z')
         # self.ax.set_axis_off()
-        self.ax.set(title='SimpleSim v1.1')
+        self.ax.set(title='SimpleSim v1.2')
 
         trajectories = [self.ax.plot([], [], [], 
                                 color=self.plot_handler[object]['color'],

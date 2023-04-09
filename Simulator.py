@@ -7,13 +7,11 @@ from matplotlib.patches import Circle
 from GroundTarget import GroundTarget
 from UAV import UAV
 
-# TO-DO: clean up code and split methods into smaller and simpler functions
 # TO-DO: study the Circle.contains() function to check whether it can be usefull in range queries
 # TO-DO: contruct a dictionary as API for flight data
-# TO-DO: film a screen cast video and send it to Vangelis
 
 class Simulator:
-    def __init__(self, visualizationEnabled=True, UAV_camera_FOV_angle_degrees=150, UAV_camera_FOV_radius=5.) -> None:
+    def __init__(self, visualizationEnabled=True, UAV_camera_FOV_angle_degrees=30, UAV_camera_FOV_radius=5.) -> None:
         self.visualizationEnabled = visualizationEnabled
         self.UAV_camera_FOV_angle_degrees = UAV_camera_FOV_angle_degrees
         self.UAV_camera_FOV_radius = UAV_camera_FOV_radius
@@ -86,34 +84,43 @@ class Simulator:
         if not self.visualizationEnabled:
             print('Visualization is disabled for this instance.')
             return
+        
+        self._set_up_axis()
+        trajectories = self._set_up_trajectories()
+        UAV_camera_FOV = self._set_up_camera_FOV()
+        trajectories.append(self.ax.add_patch(UAV_camera_FOV))
+        art3d.pathpatch_2d_to_3d(UAV_camera_FOV, z=0.)
+        animated_plot = animation.FuncAnimation(
+            self.visualization, self._update_trajectories, self.UAV.number_of_steps, fargs=(self.routes, trajectories), interval=10, repeat=False
+        )
+        plt.legend(loc='best')
+        plt.show()
 
+
+    def _set_up_axis(self) -> None:
         self.visualization = plt.figure(figsize=(8, 8))
         self.ax = self.visualization.add_subplot(111, projection='3d')
         self.ax.set(xlim3d=(0, self.UAV.route[-1, 0] + 10), xlabel='X')
         self.ax.set(ylim3d=(0, self.UAV.route[-1, 1] + 10), ylabel='Y')
         self.ax.set(zlim3d=(0, self.UAV.route[-1, 2] + 10), zlabel='Z')
         # self.ax.set_axis_off()
-        self.ax.set(title='SimpleSim v1.2')
+        self.ax.set(title='SimpleSim v1.2') 
 
-        trajectories = [self.ax.plot([], [], [], 
-                                color=self.plot_handler[object]['color'],
-                                linestyle=self.plot_handler[object]['linestyle'], 
-                                alpha=self.plot_handler[object]['alpha'], 
-                                label=self.plot_handler[object]['label'])[0] for object in self.plot_handler]
 
-        UAV_camera_FOV = Circle(xy=(0,0), 
-                                radius=0., 
-                                color='green', 
-                                label = 'camera FOV',
-                                alpha=0.5)
-        trajectories.append(self.ax.add_patch(UAV_camera_FOV))
-        art3d.pathpatch_2d_to_3d(UAV_camera_FOV, z=0.)
+    def _set_up_trajectories(self):
+        return [self.ax.plot([], [], [], 
+                color=self.plot_handler[object]['color'],
+                linestyle=self.plot_handler[object]['linestyle'], 
+                alpha=self.plot_handler[object]['alpha'], 
+                label=self.plot_handler[object]['label'])[0] for object in self.plot_handler]
+    
 
-        animated_plot = animation.FuncAnimation(
-            self.visualization, self._update_trajectories, self.UAV.number_of_steps, fargs=(self.routes, trajectories), interval=10, repeat=False
-        )
-        plt.legend(loc='best')
-        plt.show()
+    def _set_up_camera_FOV(self):
+        return Circle(xy=(0,0), 
+                      radius=0., 
+                      color='green', 
+                      label = 'camera FOV',
+                      alpha=0.5)
 
 
     def _update_trajectories(self, current_number, walks, trajectories):

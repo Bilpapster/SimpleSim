@@ -6,13 +6,16 @@ from GroundTarget import GroundTarget
 from UAV import UAV
 
 class Simulator:
-    def __init__(self, visualizationEnabled=True) -> None:
+    def __init__(self, visualizationEnabled=True, UAV_camera_FOV_angle_degrees=30) -> None:
         self.visualizationEnabled = visualizationEnabled
+        self.UAV_camera_FOV_angle_degrees = UAV_camera_FOV_angle_degrees
+
         self._initialize_UAV()
         self._initialize_ground_target()
-        self.routes = [self.UAV.route, self.target.route, self.UAV_ground_trace_route, self.UAV_camera_FOV_route]
-        self.visualization = None
         self._initialize_plot_handler()
+
+        self.routes = [self.UAV.route, self.target.route, self.UAV_ground_trace_route, self.UAV_camera_FOV_route]
+
 
     def _initialize_UAV(self) -> None:
         self.UAV = UAV()
@@ -31,7 +34,7 @@ class Simulator:
     
     def _initialize_UAV_camera_FOV(self) -> None:
         self.UAV_camera_FOV_route = self.UAV.route.copy()
-        self.UAV_camera_FOV_route[:, 1] -= np.tan(45* np.pi/180) * self.UAV_camera_FOV_route[:, 2]
+        self.UAV_camera_FOV_route[:, 1] -= np.tan(self.UAV_camera_FOV_angle_degrees * np.pi/180) * self.UAV_camera_FOV_route[:, 2]
         self.UAV_camera_FOV_route[:, 2] = 0.
 
 

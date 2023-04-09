@@ -8,15 +8,15 @@ from GroundTarget import GroundTarget
 from UAV import UAV
 
 # TO-DO: clean up code and split methods into smaller and simpler functions
-# TO-DO: make the radius of the FOV circle a parameter
 # TO-DO: study the Circle.contains() function to check whether it can be usefull in range queries
 # TO-DO: contruct a dictionary as API for flight data
 # TO-DO: film a screen cast video and send it to Vangelis
 
 class Simulator:
-    def __init__(self, visualizationEnabled=True, UAV_camera_FOV_angle_degrees=150) -> None:
+    def __init__(self, visualizationEnabled=True, UAV_camera_FOV_angle_degrees=150, UAV_camera_FOV_radius=5.) -> None:
         self.visualizationEnabled = visualizationEnabled
         self.UAV_camera_FOV_angle_degrees = UAV_camera_FOV_angle_degrees
+        self.UAV_camera_FOV_radius = UAV_camera_FOV_radius
 
         self._initialize_UAV()
         self._initialize_ground_target()
@@ -123,7 +123,7 @@ class Simulator:
 
         self.ax.patches[-1].remove()
         UAV_camera_FOV = Circle(xy=(self.UAV_camera_FOV_route[current_number, 0], self.UAV_camera_FOV_route[current_number, 1]),
-                                radius=5.,
+                                radius=self.UAV_camera_FOV_radius,
                                 color=mcolors.CSS4_COLORS['red'],
                                 label='camera FOV',
                                 alpha=0.5)

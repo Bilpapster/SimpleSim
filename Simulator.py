@@ -73,14 +73,14 @@ class Simulator:
                                        'alpha': 1}
 
     
-    def _initialize_plot_handler_UAV_camera_FOV(self):
+    def _initialize_plot_handler_UAV_camera_FOV(self) -> None:
         self.plot_handler['UAV_camera_FOV'] = {'color': mcolors.CSS4_COLORS['firebrick'],
                                                'linestyle': ':',
                                                'label': 'UAV camera FOV center',
                                                'alpha': 0.8}
 
 
-    def visualize(self):
+    def visualize(self) -> None:
         if not self.visualizationEnabled:
             print('Visualization is disabled for this instance.')
             return
@@ -107,7 +107,7 @@ class Simulator:
         self.ax.set(title='SimpleSim v1.2') 
 
 
-    def _set_up_trajectories(self):
+    def _set_up_trajectories(self) -> list:
         return [self.ax.plot([], [], [], 
                 color=self.plot_handler[object]['color'],
                 linestyle=self.plot_handler[object]['linestyle'], 
@@ -115,7 +115,7 @@ class Simulator:
                 label=self.plot_handler[object]['label'])[0] for object in self.plot_handler]
     
 
-    def _set_up_camera_FOV(self):
+    def _set_up_camera_FOV(self) -> Circle:
         return Circle(xy=(0,0), 
                       radius=0., 
                       color='green', 
@@ -123,7 +123,7 @@ class Simulator:
                       alpha=0.5)
 
 
-    def _update_trajectories(self, current_number, walks, trajectories):
+    def _update_trajectories(self, current_number, walks, trajectories) -> list:
         for trajectory, route in zip(trajectories[:-1], self.routes):
             trajectory.set_data(route[:current_number, :2].T)
             trajectory.set_3d_properties(route[:current_number, 2])

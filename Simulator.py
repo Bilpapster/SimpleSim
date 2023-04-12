@@ -6,6 +6,7 @@ import mpl_toolkits.mplot3d.art3d as art3d
 from matplotlib.patches import Circle
 from GroundTarget import GroundTarget
 from UAV import UAV
+import utilities
 
 # TO-DO: study the Circle.contains() function to check whether it can be usefull in range queries
 # TO-DO: contruct a dictionary as API for flight data
@@ -138,3 +139,28 @@ class Simulator:
         art3d.pathpatch_2d_to_3d(UAV_camera_FOV, z=0.)
         plt.legend(loc='best')
         return trajectories
+
+    def get_run_data(self) -> dict:
+        run_data = {}
+        run_data['UAV'] = self._construct_run_data_UAV()
+        run_data['target'] = self._construct_run_data_target()
+        return run_data
+    
+
+    def _construct_run_data_UAV(self) -> dict:
+        return {
+            'route': self.UAV.route.copy(),
+            'min_height': np.min(self.UAV.route[:, 2]),
+            'max_height': np.max(self.UAV.route[:, 2]),
+            'ground_trace_route': self.UAV_ground_trace_route.copy(),
+            'camera_FOV_center': self.UAV_camera_FOV_route.copy(),
+            'camera_FOV_radius': self.UAV_camera_FOV_radius,
+            'camera_FOV_angle_degrees': self.UAV_camera_FOV_angle_degrees,
+            'camera_target_miss_hits': None,
+            'camera_target_distance_from_FOV_center': None
+        }
+    
+
+    def _construct_run_data_target(self) -> dict:
+        return {'route': self.target.route.copy()}
+    

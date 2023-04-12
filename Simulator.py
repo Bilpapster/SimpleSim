@@ -10,6 +10,8 @@ import utilities
 
 # TO-DO: study the Circle.contains() function to check whether it can be usefull in range queries
 # TO-DO: contruct a dictionary as API for flight data
+# TO-DO: complete functionality for run data dictionary (miss/hit & distance from FOV center)
+# TO-DO: add docstrings and in-line comments
 
 class Simulator:
     def __init__(self, visualizationEnabled=True, UAV_camera_FOV_angle_degrees=30, UAV_camera_FOV_radius=5.) -> None:

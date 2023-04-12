@@ -6,11 +6,8 @@ import mpl_toolkits.mplot3d.art3d as art3d
 from matplotlib.patches import Circle
 from GroundTarget import GroundTarget
 from UAV import UAV
-import utilities
+import utilities as utils
 
-# TO-DO: study the Circle.contains() function to check whether it can be usefull in range queries
-# TO-DO: contruct a dictionary as API for flight data
-# TO-DO: complete functionality for run data dictionary (miss/hit & distance from FOV center)
 # TO-DO: add docstrings and in-line comments
 
 class Simulator:
@@ -150,6 +147,8 @@ class Simulator:
     
 
     def _construct_run_data_UAV(self) -> dict:
+        camera_target_miss_hits, camera_target_distance_from_FOV_center = self._compute_euclidean_distances()
+
         return {
             'route': self.UAV.route.copy(),
             'min_height': np.min(self.UAV.route[:, 2]),
@@ -158,9 +157,23 @@ class Simulator:
             'camera_FOV_center': self.UAV_camera_FOV_route.copy(),
             'camera_FOV_radius': self.UAV_camera_FOV_radius,
             'camera_FOV_angle_degrees': self.UAV_camera_FOV_angle_degrees,
-            'camera_target_miss_hits': None,
-            'camera_target_distance_from_FOV_center': None
+            'camera_target_miss_hits': np.array(camera_target_miss_hits),
+            'camera_target_distance_from_FOV_center': np.array(camera_target_distance_from_FOV_center)
         }
+    
+
+    def _compute_euclidean_distances(self):
+        camera_target_miss_hits = []
+        camera_target_distance_from_FOV_center = []
+
+        for UAV_coordinates, FOV_center_coordinates in zip(self.UAV.route, self.UAV_camera_FOV_route):
+            UAV_coordinates = UAV_coordinates[:2]
+            FOV_center_coordinates = FOV_center_coordinates[:2]
+            euclidean_distance = utils.compute_euclidean_distance(UAV_coordinates, FOV_center_coordinates)
+            camera_target_distance_from_FOV_center.append(euclidean_distance)
+            camera_target_miss_hits.append(True if euclidean_distance <= self.UAV_camera_FOV_radius else False)
+
+        return camera_target_miss_hits, camera_target_distance_from_FOV_center
     
 
     def _construct_run_data_target(self) -> dict:

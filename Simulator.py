@@ -100,8 +100,11 @@ class Simulator:
     def _set_up_axis(self) -> None:
         self.visualization = plt.figure(figsize=(8, 8))
         self.ax = self.visualization.add_subplot(111, projection='3d')
-        self.ax.set(xlim3d=(0, self.UAV.route[-1, 0] + 10), xlabel='X')
-        self.ax.set(ylim3d=(0, self.UAV.route[-1, 1] + 10), ylabel='Y')
+        max_ground_limit = np.max((self.UAV.route[-1, 0], self.UAV.route[-1, 1],
+                                   self.target.route[-1, 0], self.target.route[-1, 1]))
+        axis_view_offset = 10
+        self.ax.set(xlim3d=(0, max_ground_limit + axis_view_offset), xlabel='X')
+        self.ax.set(ylim3d=(0, max_ground_limit + axis_view_offset), ylabel='Y')
         self.ax.set(zlim3d=(0, self.UAV.route[-1, 2] + 10), zlabel='Z')
         # self.ax.set_axis_off()
         self.ax.set(title='SimpleSim v1.3') 
@@ -138,6 +141,7 @@ class Simulator:
         art3d.pathpatch_2d_to_3d(UAV_camera_FOV, z=0.)
         plt.legend(loc='best')
         return trajectories
+
 
     def get_run_data(self) -> dict:
         run_data = {}

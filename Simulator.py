@@ -4,6 +4,7 @@ import matplotlib.animation as animation
 import matplotlib.colors as mcolors
 import mpl_toolkits.mplot3d.art3d as art3d
 from matplotlib.patches import Circle
+from ColorManager import ColorManager
 from GroundTarget import GroundTarget
 from UAV import UAV
 import utilities as utils
@@ -11,26 +12,31 @@ import utilities as utils
 # TO-DO: add docstrings and in-line comments
 
 class Simulator:
-    def __init__(self, visualizationEnabled=True, UAV_camera_FOV_angle_degrees=30, UAV_camera_FOV_radius=5.) -> None:
+    def __init__(self, visualizationEnabled=True, 
+                 UAV_camera_FOV_angle_degrees=30, UAV_camera_FOV_radius=7.,
+                 UAV_start_position=None, target_start_position=None,
+                 theme='light') -> None:
         self.visualizationEnabled = visualizationEnabled
         self.UAV_camera_FOV_angle_degrees = UAV_camera_FOV_angle_degrees
         self.UAV_camera_FOV_radius = UAV_camera_FOV_radius
+        self.color_manager = ColorManager(theme=theme)
 
-        self._initialize_UAV()
-        self._initialize_ground_target()
+        self._initialize_UAV(UAV_start_position)
+        self._initialize_ground_target(target_start_position)
         self._initialize_plot_handler()
 
         self.routes = [self.UAV.route, self.target.route, self.UAV_ground_trace_route, self.UAV_camera_FOV_route]
 
 
-    def _initialize_UAV(self) -> None:
-        self.UAV = UAV()
+    def _initialize_UAV(self, UAV_start_position) -> None:
+        self.UAV = UAV() if UAV_start_position is None else UAV(start_position=UAV_start_position)
+            
         self._initialize_UAV_ground_trace()
         self._initialize_UAV_camera_FOV()
 
 
-    def _initialize_ground_target(self) -> None:
-        self.target = GroundTarget()
+    def _initialize_ground_target(self, target_start_position) -> None:
+        self.target = GroundTarget() if target_start_position is None else GroundTarget(start_position=target_start_position)
 
 
     def _initialize_UAV_ground_trace(self) -> None:
@@ -53,25 +59,25 @@ class Simulator:
 
 
     def _initialize_plot_hanlder_UAV(self) -> None:
-        self.plot_handler['UAV'] = {'color': mcolors.CSS4_COLORS['darkorchid'],
+        self.plot_handler['UAV'] = {'color': self.color_manager.get_color('UAV'),
                                     'linestyle': '-',
                                     'label': 'UAV',
                                     'marker': '4',
-                                    'markersize': 14,
+                                    'markersize': 15,
                                     'alpha': 1}
 
     
     def _initialize_plot_hander_UAV_ground_trace(self) -> None:
-        self.plot_handler['UAV_ground_trace'] = {'color': mcolors.CSS4_COLORS['slategrey'],
+        self.plot_handler['UAV_ground_trace'] = {'color': self.color_manager.get_color('UAV_ground_trace'),
                                                  'linestyle': ':',
                                                  'label': 'UAV ground trace',
-                                                 'marker': '4',
-                                                 'markersize': 14,
+                                                 'marker': '.',
+                                                 'markersize': None,
                                                  'alpha': 0.5}
 
     
     def _initialize_plot_handler_target(self) -> None:
-        self.plot_handler['target'] = {'color': mcolors.CSS4_COLORS['lime'],
+        self.plot_handler['target'] = {'color': self.color_manager.get_color('target'),
                                        'linestyle': (5, (10, 3)), # long dash with offset
                                        'label': 'target',
                                        'marker':'X',
@@ -80,7 +86,7 @@ class Simulator:
 
     
     def _initialize_plot_handler_UAV_camera_FOV(self) -> None:
-        self.plot_handler['UAV_camera_FOV'] = {'color': mcolors.CSS4_COLORS['firebrick'],
+        self.plot_handler['UAV_camera_FOV'] = {'color': self.color_manager.get_color('UAV_camera_FOV'),
                                                'linestyle': ':',
                                                'label': 'UAV camera FOV center',
                                                'alpha': 0.8}
@@ -100,11 +106,13 @@ class Simulator:
             self.visualization, self._update_trajectories, self.UAV.number_of_steps, fargs=(self.routes, trajectories), interval=10, repeat=False
         )
         plt.legend(loc='best')
+        plt.gca().set_facecolor(self.color_manager.get_color('background'))
         plt.show()
 
 
     def _set_up_axis(self) -> None:
         self.visualization = plt.figure(figsize=(8, 8))
+        self.visualization.patch.set_facecolor(self.color_manager.get_color('background'))
         self.ax = self.visualization.add_subplot(111, projection='3d')
         max_ground_limit = np.max((self.UAV.route[-1, 0], self.UAV.route[-1, 1],
                                    self.target.route[-1, 0], self.target.route[-1, 1]))
@@ -113,25 +121,21 @@ class Simulator:
         self.ax.set(ylim3d=(0, max_ground_limit + axis_view_offset), ylabel='Y')
         self.ax.set(zlim3d=(0, self.UAV.route[-1, 2] + 10), zlabel='Z')
         # self.ax.set_axis_off()
-        self.ax.set(title='SimpleSim v1.4') 
+        self.ax.set_title('SimpleSim v1.4', color=self.color_manager.get_color('foreground'), fontsize=20)
 
 
     def _set_up_trajectories(self) -> list:
         return [self.ax.plot([], [], [], 
-                color=self.plot_handler[object]['color'],
-                linestyle=self.plot_handler[object]['linestyle'], 
-                alpha=self.plot_handler[object]['alpha'], 
-                marker=self.plot_handler[object]['marker'],
-                markersize=self.plot_handler[object]['markersize'],
-                label=self.plot_handler[object]['label'])[0] for object in self.plot_handler]
+                color=self.plot_handler.get(object).get('color'),
+                linestyle=self.plot_handler.get(object).get('linestyle'), 
+                alpha=self.plot_handler.get(object).get('alpha'), 
+                marker=self.plot_handler.get(object).get('marker'),
+                markersize=self.plot_handler.get(object).get('markersize'),
+                label=self.plot_handler.get(object).get('label'))[0] for object in self.plot_handler]
     
 
     def _set_up_camera_FOV(self) -> Circle:
-        return Circle(xy=(0,0), 
-                      radius=0., 
-                      color='green', 
-                      label = 'camera FOV',
-                      alpha=0.5)
+        return Circle(xy=(0,0), radius=0.)
 
 
     def _update_trajectories(self, current_number, walks, trajectories) -> list:
@@ -142,7 +146,7 @@ class Simulator:
         self.ax.patches[-1].remove()
         UAV_camera_FOV = Circle(xy=(self.UAV_camera_FOV_route[current_number, 0], self.UAV_camera_FOV_route[current_number, 1]),
                                 radius=self.UAV_camera_FOV_radius,
-                                color=mcolors.CSS4_COLORS['royalblue'],
+                                color=self.color_manager.get_color('UAV_camera_FOV'),
                                 label='camera FOV',
                                 alpha=0.5)
         trajectories[-1] = self.ax.add_patch(UAV_camera_FOV)

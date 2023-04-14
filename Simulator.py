@@ -9,13 +9,54 @@ from GroundTarget import GroundTarget
 from UAV import UAV
 import utilities as utils
 
-# TO-DO: add docstrings and in-line comments
 
 class Simulator:
+    """
+    Represents a simulator environment that executes runs. The environment contains an abstraction of an UAV (equiped with a camera) and a ground target. 
+
+    The UAV is a flying Movable3D object that moves in the 3D space. It is equiped with a camera that focuses on the ground under a specific angle with the 
+    horizontal axis. The UAV trajectory, as well as the UAV ground trace and the camera field of view (FOV) can be visualized in an animated 3D plot.
+
+    The ground target is a ground Movable3D object that moves in the 3D space. It follows a trajectory on the ground (height is equal to 0) throughout its
+    whole movement. Its trajectory is visualized in the same animated 3D plot as the UAV.
+    
+    Attributes:
+        - visualizationEnabled      (bool):         Defines whether the environment can be visualized or not.
+        - UAV                       (UAV):          The UAV object of the simulation.
+        - UAV_start_position        (array-like):   The start position (x, y, z) of the UAV movement.
+        - UAV_camera_FOV_degrees    (float):        The degrees the camera vision line shapes with the horizontal axis. 
+        - UAV_camera_FOV_radius     (float):        The radius of the UAV camera FOV.
+        - UAV_camera_FOV_route      (ndarray):      The route of the UAV FOV center.
+        - UAV_ground_trace_route    (ndarray):      The trace (vertical shadow) of the UAV object on the ground. 
+        - target                    (GroundTarget): The ground target object of the simulation.
+        - target_start_position     (array-like):   The start position (x, y, z) of the ground target movement.
+        - routes                    (ndarray):      An array that contains the routes of all the objects of the environment.
+        - color_manager             (ColorManager): A custom class object for color and theme management throughout the environment.
+        - theme                     (str):          The theme ('light' or 'dark') of the SimpleSim application.
+        - plot_handler              (dict):         A special 2-level dictionary for plot management of the animated run.
+        - ax                        (Axes):         The axes of the animated run.
+
+    """
+
     def __init__(self, visualizationEnabled=True, 
                  UAV_camera_FOV_angle_degrees=30, UAV_camera_FOV_radius=7.,
                  UAV_start_position=None, target_start_position=None,
                  theme='light') -> None:
+        """
+        The constructor for the Simulator class. Creates the environment, initializes the objects, their routes, as 
+        well as the color and plot management instances.
+
+        Args:
+            visualizationEnabled          (bool, optional):         Defines whether the visualization is enabled or not for this environment. Defaults to True.
+            UAV_camera_FOV_angle_degrees  (float, optional):        The angle (in degrees) that the UAV camera vision shapes with the horizontal axis. 
+                                                                    Defaults to 30°.
+            UAV_camera_FOV_radius         (float, optional):        The radius of the UAV camera field of view (FOV). Defaults to 7.0.
+            UAV_start_position            (array-like, optional):   The start position (x, y, z) of the UAV movement. Defaults to None, which leads to 
+                                                                    Movable3D constructor default value.
+            target_start_position         (array-like, optional):   The start position (x, y, z) of the ground target. Defaults to None, which leads to
+                                                                    Movable3D constructor default value.
+            theme                         (str, optional):          The theme (see ColorManager class for available options). Defaults to 'light'.
+        """
         self.visualizationEnabled = visualizationEnabled
         self.UAV_camera_FOV_angle_degrees = UAV_camera_FOV_angle_degrees
         self.UAV_camera_FOV_radius = UAV_camera_FOV_radius
@@ -29,6 +70,12 @@ class Simulator:
 
 
     def _initialize_UAV(self, UAV_start_position) -> None:
+        """
+        (for inside-class use only) Initializes the UAV object and its components.
+
+        Args:
+            UAV_start_position (array-like): The start position of the UAV object movement.
+        """
         self.UAV = UAV() if UAV_start_position is None else UAV(start_position=UAV_start_position)
             
         self._initialize_UAV_ground_trace()
@@ -36,21 +83,37 @@ class Simulator:
 
 
     def _initialize_ground_target(self, target_start_position) -> None:
+        """
+        (for inside-class use only) Initializes the ground target object.
+
+        Args:
+            target_start_position (array-like): The start position of the ground target object movement.
+        """
         self.target = GroundTarget() if target_start_position is None else GroundTarget(start_position=target_start_position)
 
 
     def _initialize_UAV_ground_trace(self) -> None:
+        """
+        (for inside-class use only) Initializes the ground trace (vertical shadow) of the UAV object on the ground.
+        """
         self.UAV_ground_trace_route = self.UAV.route.copy()
         self.UAV_ground_trace_route[:, 2] = 0
 
     
     def _initialize_UAV_camera_FOV(self) -> None:
+        """
+        (for inside-class use only) Initializes the UAV camera field of view center and its route, based on the 
+        angle of vision as well as the position of the UAV throughout its movement.
+        """
         self.UAV_camera_FOV_route = self.UAV.route.copy()
         self.UAV_camera_FOV_route[:, 1] -= np.tan(self.UAV_camera_FOV_angle_degrees * np.pi/180) * self.UAV_camera_FOV_route[:, 2]
         self.UAV_camera_FOV_route[:, 2] = 0.
 
 
     def _initialize_plot_handler(self) -> None:
+        """
+        (for inside-class use only) Initializes all the components of the plot handling object for the animated plot visualization.
+        """
         self.plot_handler = {}
         self._initialize_plot_hanlder_UAV()
         self._initialize_plot_handler_target()
@@ -59,6 +122,9 @@ class Simulator:
 
 
     def _initialize_plot_hanlder_UAV(self) -> None:
+        """
+        (for inside-class use only) Initializes the plot handling object component that is responsible for the UAV.
+        """
         self.plot_handler['UAV'] = {'color': self.color_manager.get_color('UAV'),
                                     'linestyle': '-',
                                     'label': 'UAV',
@@ -68,6 +134,9 @@ class Simulator:
 
     
     def _initialize_plot_hander_UAV_ground_trace(self) -> None:
+        """
+        (for inside-class use only) Initializes the plot handling object component that is responsible for the UAV trace on the ground.
+        """
         self.plot_handler['UAV_ground_trace'] = {'color': self.color_manager.get_color('UAV_ground_trace'),
                                                  'linestyle': ':',
                                                  'label': 'UAV ground trace',
@@ -77,6 +146,9 @@ class Simulator:
 
     
     def _initialize_plot_handler_target(self) -> None:
+        """
+        (for inside-class use only) Initializes the plot handling object component that is responsible for the ground target.
+        """
         self.plot_handler['target'] = {'color': self.color_manager.get_color('target'),
                                        'linestyle': (5, (10, 3)), # long dash with offset
                                        'label': 'target',
@@ -86,6 +158,9 @@ class Simulator:
 
     
     def _initialize_plot_handler_UAV_camera_FOV(self) -> None:
+        """
+        (for inside-class use only) Initializes the plot handling object component that is responsible for the UAV camera field of view.
+        """
         self.plot_handler['UAV_camera_FOV'] = {'color': self.color_manager.get_color('UAV_camera_FOV'),
                                                'linestyle': ':',
                                                'label': 'UAV camera FOV center',
@@ -93,6 +168,10 @@ class Simulator:
 
 
     def visualize(self) -> None:
+        """
+        Produces an animated 3-dimensional plot with the simulation elements, all in the same figure. The plot contains the trajectories 
+        of the environment elements (animated), a title and a legend.
+        """
         if not self.visualizationEnabled:
             print('Visualization is disabled for this instance.')
             return
@@ -111,6 +190,9 @@ class Simulator:
 
 
     def _set_up_axis(self) -> None:
+        """
+        (for inside-class use only) Sets up the axis for the animated, 3-dimensional plot.
+        """
         self.visualization = plt.figure(figsize=(8, 8))
         self.visualization.patch.set_facecolor(self.color_manager.get_color('background'))
         self.ax = self.visualization.add_subplot(111, projection='3d')
@@ -125,6 +207,13 @@ class Simulator:
 
 
     def _set_up_trajectories(self) -> list:
+        """
+        (for inside-class use only) Configures the initial state (placeholder) of the trajectories of the different elements of the 
+        simulation (statically).
+
+        Returns:
+            list: a list of all the trajectories that are visualized in the 3-dimensional plot.
+        """
         return [self.ax.plot([], [], [], 
                 color=self.plot_handler.get(object).get('color'),
                 linestyle=self.plot_handler.get(object).get('linestyle'), 
@@ -135,10 +224,29 @@ class Simulator:
     
 
     def _set_up_camera_FOV(self) -> Circle:
+        """
+        (for inside-class use only) Configures the initial state (palceholder) of the UAV camera field of view. The latter is a circle 
+        with radius equal to value specified in the respective class attribute.
+
+        Returns:
+            Circle: The circle that represents the UAV camera field of view on the ground.
+        """
         return Circle(xy=(0,0), radius=0.)
 
 
     def _update_trajectories(self, current_number, walks, trajectories) -> list:
+        """
+        (for inside-class use only) A method that is automatically calle by the FuncAnimation process. Updates the trajectories of the 
+        different elements of the simulation to the current number of steps.
+
+        Args:
+            current_number (int): the current step of the animated plot
+            walks (dummy): dummy argument
+            trajectories (lsit): the active trajectories that are visualized in the 3-dimensional animated plot
+
+        Returns:
+            list: the updated trajectories that are going to be visualizd in the 3-dimensional animated plot
+        """
         for trajectory, route in zip(trajectories[:-1], self.routes):
             trajectory.set_data(route[(current_number-1):current_number, :2].T)
             trajectory.set_3d_properties(route[(current_number-1):current_number, 2])
@@ -156,6 +264,33 @@ class Simulator:
 
 
     def get_run_data(self) -> dict:
+        """
+        Constructs and returns a special 2-leveled dictionary that contains the data of the current simulated run.
+        The returned dictionary is 2-dimensional. The first dimension values are dictionaries themselves that contain
+        as values the actual data. In particular, the dictionary has the following structure:
+            - UAV (top level key)
+                - route                                     (ndarray):  the exact coordinates (x, y, z) at every step of the UAV flight
+                - min_height                                (float):    the minimum height the UAV reached during flight
+                - max_height                                (float):    the maximum height the UAV reached during flight
+                - ground_trace_route                        (ndarray):  the exact coordinates (x, y, z) of the ground trace of the UAV 
+                                                                        at every step of its flight
+                - camera_FOV_center                         (ndarray):  the exact coordinates (x, y, z) of the UAV camera field of view 
+                                                                        center at every step of its flight
+                - camera_FOV_radius                         (float):    the radius of the UAV camera field of view center
+                - camera_FOV_angle_degrees                  (float):    the angle (in degrees) that the UAV camera vision shapes with 
+                                                                        the horizontal axis
+                - camera_target_miss_hits                   (ndarray):  contains number_of_steps boolean values (True -> target inside 
+                                                                        FOV at step i, False -> target outside FOV at step 1)
+                - camera_target_distance_form_FOV_center    (ndarray):  contains number_of_steps float values that represent the distance 
+                                                                        between the target and the camera field of view center at every step
+
+            - target (top level key)
+                - route                                     (ndarray): the exact coordinates (x, y, z) at every step of the target movement
+
+
+        Returns:
+            dict: a 2-dimensional dictionary that contains the data of the current simulated run.
+        """
         run_data = {}
         run_data['UAV'] = self._construct_run_data_UAV()
         run_data['target'] = self._construct_run_data_target()
@@ -163,6 +298,13 @@ class Simulator:
     
 
     def _construct_run_data_UAV(self) -> dict:
+        """
+        (for inside-class use only) Constructs and returns the dictionary component of the run_data dictionary that is responsible 
+        for the UAV data.
+
+        Returns:
+            dict: a dictionary that contains the data related to the UAV object of the current simulated run.
+        """
         camera_target_miss_hits, camera_target_distance_from_FOV_center = self._compute_euclidean_distances()
 
         return {
@@ -179,6 +321,17 @@ class Simulator:
     
 
     def _compute_euclidean_distances(self):
+        """
+        (for inside-class use only) Computes the distance of the FOV center from the target at every step of the simulated flight and 
+        constructs an numpy array containing this data, that is returned. It also returns a miss-hit array 
+        (see get_run_data() method for more).
+
+        Returns:
+            ndarray: a numpy array that contains number_of_steps boolean values (True -> Hit, Flase -> Miss), one for every step of 
+                     the simulated run
+            ndarray: a numpy array that contains number_of_steps float values representing the distance between the UAV FOV center 
+                     and the target at every step of the simulated run
+        """
         camera_target_miss_hits = []
         camera_target_distance_from_FOV_center = []
 
@@ -193,5 +346,11 @@ class Simulator:
     
 
     def _construct_run_data_target(self) -> dict:
+        """
+        (for inside-class use only) Constructs and returns the dictionary component of the run_data dictionary that is responsible for the target object data.
+
+        Returns:
+            dict: a dictionary that contains the data related to the target object of the current simulated run.
+        """
         return {'route': self.target.route.copy()}
     

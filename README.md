@@ -2,7 +2,7 @@
 A complete environment for ***executing***, ***visualizing*** and ***analyzing*** simulated flights of an Unmanned Aerial Vehicle (UAV) 
 chasing a ground target.
 
-[Example run](https://github.com/Bilpapster/SimpleSim/blob/main/Repository%20resources/animation.gif)
+![Example run](https://github.com/Bilpapster/SimpleSim/blob/main/Repository%20resources/animation.gif)
 
 
 ## 0. Abstract

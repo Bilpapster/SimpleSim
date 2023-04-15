@@ -260,6 +260,7 @@ class Simulator:
         trajectories[-1] = self.ax.add_patch(UAV_camera_FOV)
         art3d.pathpatch_2d_to_3d(UAV_camera_FOV, z=0.)
         plt.legend(loc='best')
+        # plt.savefig('Test/' + str(current_number) + '.png')
         return trajectories
 
 

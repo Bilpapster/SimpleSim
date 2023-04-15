@@ -203,7 +203,7 @@ class Simulator:
         self.ax.set(ylim3d=(0, max_ground_limit + axis_view_offset), ylabel='Y')
         self.ax.set(zlim3d=(0, self.UAV.route[-1, 2] + 10), zlabel='Z')
         # self.ax.set_axis_off()
-        self.ax.set_title('SimpleSim v1.4', color=self.color_manager.get_color('foreground'), fontsize=20)
+        self.ax.set_title('SimpleSim v1.5', color=self.color_manager.get_color('foreground'), fontsize=20)
 
 
     def _set_up_trajectories(self) -> list:

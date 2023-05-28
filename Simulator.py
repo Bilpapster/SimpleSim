@@ -203,7 +203,7 @@ class Simulator:
 
 
         animated_plot = animation.FuncAnimation(
-            self.visualization, self._update_trajectories, self.UAV.number_of_steps, fargs=(self.routes, trajectories), interval=100, repeat=False
+            self.visualization, self._update_trajectories, self.UAV.number_of_steps, fargs=(self.routes, trajectories), interval=20, repeat=False
         )
         # plt.gca().set_facecolor(self.color_manager.get_color('background'))
         plt.show()
@@ -224,7 +224,7 @@ class Simulator:
         self.ax.set(zlim3d=(0, self.UAV.route[-1, 2] + 10), zlabel='Z')
         # self.ax.set_axis_off()
         self.ax.set_facecolor(self.color_manager.get_color('background'))
-        self.ax.set_title('SimpleSim v1.5', color=self.color_manager.get_color('foreground'), fontsize=20)
+        self.ax.set_title('SimpleSim v1.6', color=self.color_manager.get_color('foreground'), fontsize=20)
 
         self.ax2 = self.visualization.add_subplot(122)
         self.ax2.add_patch(Circle((0,0), 1, color= self.color_manager.get_color('UAV_camera_FOV'), alpha=0.5, label="camera FOV"))

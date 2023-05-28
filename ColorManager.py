@@ -19,7 +19,7 @@ class ColorManager():
         self.color_map = {}
         self.default_theme = 'light'
         self.theme = theme if theme in ('dark', 'light') else self.default_theme
-        self.color_map['background'] = {'light': mcolors.CSS4_COLORS['whitesmoke'],
+        self.color_map['background'] = {'light': mcolors.CSS4_COLORS['lightgray'],
                                         'dark': mcolors.CSS4_COLORS['black']}
         
         self.color_map['foreground'] = {'light': mcolors.CSS4_COLORS['black'],

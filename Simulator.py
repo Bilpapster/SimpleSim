@@ -126,7 +126,7 @@ class Simulator:
         (for inside-class use only) Initializes the plot handling object component that is responsible for the UAV.
         """
         self.plot_handler['UAV'] = {'color': self.color_manager.get_color('UAV'),
-                                    'linestyle': '-',
+                                    'linestyle': ':',
                                     'label': 'UAV',
                                     'marker': '4',
                                     'markersize': 15,
@@ -150,7 +150,7 @@ class Simulator:
         (for inside-class use only) Initializes the plot handling object component that is responsible for the ground target.
         """
         self.plot_handler['target'] = {'color': self.color_manager.get_color('target'),
-                                       'linestyle': (5, (10, 3)), # long dash with offset
+                                       'linestyle': ':',
                                        'label': 'target',
                                        'marker':'X',
                                        'markersize': None,
@@ -181,11 +181,31 @@ class Simulator:
         UAV_camera_FOV = self._set_up_camera_FOV()
         trajectories.append(self.ax.add_patch(UAV_camera_FOV))
         art3d.pathpatch_2d_to_3d(UAV_camera_FOV, z=0.)
+        trajectories.append(self.ax2.plot([], [], marker='X', color=self.color_manager.get_color('target'), label='target', linestyle='None'))
+        #  todo todo todo better
+        trajectories.append(self.ax.plot([], [], [], 
+                                         color=self.plot_handler.get('UAV').get('color'),
+                                         linestyle=self.plot_handler.get('UAV').get('linestyle'), 
+                                         alpha=self.plot_handler.get('UAV').get('alpha'), 
+                                         label= '_UAV_trail')[0])
+        
+        trajectories.append(self.ax.plot([], [], [], 
+                                         color=self.plot_handler.get('target').get('color'),
+                                         linestyle=self.plot_handler.get('target').get('linestyle'), 
+                                         alpha=self.plot_handler.get('target').get('alpha'), 
+                                         label= '_target_trail')[0])
+        
+        trajectories.append(self.ax.plot([], [], [], 
+                                         color=self.plot_handler.get('UAV_ground_trace').get('color'),
+                                         linestyle=self.plot_handler.get('UAV_ground_trace').get('linestyle'), 
+                                         alpha=self.plot_handler.get('UAV_ground_trace').get('alpha'), 
+                                         label= '_UAV_ground_trace_trail')[0])
+
+
         animated_plot = animation.FuncAnimation(
-            self.visualization, self._update_trajectories, self.UAV.number_of_steps, fargs=(self.routes, trajectories), interval=10, repeat=False
+            self.visualization, self._update_trajectories, self.UAV.number_of_steps, fargs=(self.routes, trajectories), interval=100, repeat=False
         )
-        plt.legend(loc='best')
-        plt.gca().set_facecolor(self.color_manager.get_color('background'))
+        # plt.gca().set_facecolor(self.color_manager.get_color('background'))
         plt.show()
 
 
@@ -193,9 +213,9 @@ class Simulator:
         """
         (for inside-class use only) Sets up the axis for the animated, 3-dimensional plot.
         """
-        self.visualization = plt.figure(figsize=(8, 8))
+        self.visualization = plt.figure(figsize=(20, 20), facecolor=self.color_manager.get_color('background'))
         self.visualization.patch.set_facecolor(self.color_manager.get_color('background'))
-        self.ax = self.visualization.add_subplot(111, projection='3d')
+        self.ax = self.visualization.add_subplot(121, projection='3d')
         max_ground_limit = np.max((self.UAV.route[-1, 0], self.UAV.route[-1, 1],
                                    self.target.route[-1, 0], self.target.route[-1, 1]))
         axis_view_offset = 10
@@ -203,7 +223,15 @@ class Simulator:
         self.ax.set(ylim3d=(0, max_ground_limit + axis_view_offset), ylabel='Y')
         self.ax.set(zlim3d=(0, self.UAV.route[-1, 2] + 10), zlabel='Z')
         # self.ax.set_axis_off()
+        self.ax.set_facecolor(self.color_manager.get_color('background'))
         self.ax.set_title('SimpleSim v1.5', color=self.color_manager.get_color('foreground'), fontsize=20)
+
+        self.ax2 = self.visualization.add_subplot(122)
+        self.ax2.add_patch(Circle((0,0), 1, color= self.color_manager.get_color('UAV_camera_FOV'), alpha=0.5, label="camera FOV"))
+        self.ax2.set(xlim=(-1.5, 1.5), ylim=(-1.5, 1.5))
+        self.ax2.set_aspect(1.0/self.ax2.get_data_ratio(), adjustable='box')
+        self.ax2.set_axis_off()
+        self.ax2.set_title("UAV camera FOV", color=self.color_manager.get_color('foreground'), fontsize=20)
 
 
     def _set_up_trajectories(self) -> list:
@@ -247,7 +275,7 @@ class Simulator:
         Returns:
             list: the updated trajectories that are going to be visualizd in the 3-dimensional animated plot
         """
-        for trajectory, route in zip(trajectories[:-1], self.routes):
+        for trajectory, route in zip(trajectories[:-5], self.routes):
             trajectory.set_data(route[(current_number-1):current_number, :2].T)
             trajectory.set_3d_properties(route[(current_number-1):current_number, 2])
 
@@ -257,10 +285,27 @@ class Simulator:
                                 color=self.color_manager.get_color('UAV_camera_FOV'),
                                 label='camera FOV',
                                 alpha=0.5)
-        trajectories[-1] = self.ax.add_patch(UAV_camera_FOV)
+        trajectories[-5] = self.ax.add_patch(UAV_camera_FOV)
         art3d.pathpatch_2d_to_3d(UAV_camera_FOV, z=0.)
-        plt.legend(loc='best')
         # plt.savefig('Test/' + str(current_number) + '.png')
+
+        target_x_rescaled = (self.target.route[current_number, 0] - self.UAV_camera_FOV_route[current_number, 0]) / self.UAV_camera_FOV_radius   
+        target_y_rescaled = (self.target.route[current_number, 1] - self.UAV_camera_FOV_route[current_number, 1]) / self.UAV_camera_FOV_radius
+        trajectories[-4][0].set_data(target_x_rescaled, target_y_rescaled)
+
+
+        # todo todo todo todo todo todo better
+        trajectories[-3].set_data(self.UAV.route[:(current_number-1), :2].T)
+        trajectories[-3].set_3d_properties(self.UAV.route[:(current_number-1), 2])
+
+        trajectories[-2].set_data(self.target.route[:(current_number-1), :2].T)
+        trajectories[-2].set_3d_properties(self.target.route[:(current_number-1), 2])
+
+        trajectories[-1].set_data(self.UAV_ground_trace_route[:(current_number-1), :2].T)
+        trajectories[-1].set_3d_properties(self.UAV_ground_trace_route[:(current_number-1), 2])
+
+        self.ax.legend(loc='best')
+        self.ax2.legend(loc='best')
         return trajectories
 
 

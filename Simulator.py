@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import matplotlib.colors as mcolors
@@ -39,7 +40,7 @@ class Simulator:
     """
 
     def __init__(self, visualizationEnabled=True, 
-                 UAV_camera_FOV_angle_degrees=30, UAV_camera_FOV_radius=7.,
+                 UAV_camera_FOV_angle_degrees=80, UAV_camera_FOV_radius=3.,
                  UAV_start_position=None, target_start_position=None,
                  theme='light') -> None:
         """
@@ -106,8 +107,25 @@ class Simulator:
         angle of vision as well as the position of the UAV throughout its movement.
         """
         self.UAV_camera_FOV_route = self.UAV.route.copy()
-        self.UAV_camera_FOV_route[:, 1] -= np.tan(self.UAV_camera_FOV_angle_degrees * np.pi/180) * self.UAV_camera_FOV_route[:, 2]
+        # self.UAV_camera_FOV_route[:, 1] -= np.tan(self.UAV_camera_FOV_angle_degrees * np.pi/180) * self.UAV_camera_FOV_route[:, 2]
+
+
+        for step in range(self.UAV.number_of_steps):
+            displacement_x, displacement_y = self._calculate_fov_center(float(step * 10), self.UAV_camera_FOV_angle_degrees)
+            self.UAV_camera_FOV_route[step, 0] += displacement_x
+            self.UAV_camera_FOV_route[step, 1] += displacement_y
+
         self.UAV_camera_FOV_route[:, 2] = 0.
+
+    def _calculate_fov_center(self, yaw, fov_angle):
+        # Convert yaw angle to radians
+        yaw_rad = np.deg2rad(yaw)
+
+        # Calculate the displacement in the x and y directions
+        displacement_x = np.tan(np.deg2rad(fov_angle)) * np.sin(yaw_rad)
+        displacement_y = np.tan(np.deg2rad(fov_angle)) * np.cos(yaw_rad)
+
+        return displacement_x, displacement_y
 
 
     def _initialize_plot_handler(self) -> None:

@@ -77,6 +77,9 @@ class Simulator:
             UAV_start_position (array-like): The start position of the UAV object movement.
         """
         self.UAV = UAV() if UAV_start_position is None else UAV(start_position=UAV_start_position)
+
+        # self.UAV._set_linear_trajectory(start_point = np.array([1, 1, 1]), end_point=np.array([50, 50, 50]), velocity=3.0, duration=100, dt=0.1)
+        # self.UAV._simulate_orbit(center = np.array([10, 10, 10]), radius=10, velocity=3.0, duration=100, dt=0.1)
             
         self._initialize_UAV_ground_trace()
         self._initialize_UAV_camera_FOV()

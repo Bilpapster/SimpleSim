@@ -200,19 +200,24 @@ class Simulator:
         trajectories.append(self.ax.add_patch(UAV_camera_FOV))
         art3d.pathpatch_2d_to_3d(UAV_camera_FOV, z=0.)
         trajectories.append(self.ax2.plot([], [], marker='X', color=self.color_manager.get_color('target'), label='target', linestyle='None'))
-        #  todo todo todo better
+
+        # todo: find a more concise algorithmic way to discriminate the base trajectories from the trail ones
+
+        # appends the trajectory of the UAV trail 
         trajectories.append(self.ax.plot([], [], [], 
                                          color=self.plot_handler.get('UAV').get('color'),
                                          linestyle=self.plot_handler.get('UAV').get('linestyle'), 
                                          alpha=self.plot_handler.get('UAV').get('alpha'), 
                                          label= '_UAV_trail')[0])
         
+        # appends the trajectory of the target trail
         trajectories.append(self.ax.plot([], [], [], 
                                          color=self.plot_handler.get('target').get('color'),
                                          linestyle=self.plot_handler.get('target').get('linestyle'), 
                                          alpha=self.plot_handler.get('target').get('alpha'), 
                                          label= '_target_trail')[0])
         
+        # appends the trajectory of the UAV ground trace
         trajectories.append(self.ax.plot([], [], [], 
                                          color=self.plot_handler.get('UAV_ground_trace').get('color'),
                                          linestyle=self.plot_handler.get('UAV_ground_trace').get('linestyle'), 
@@ -221,7 +226,7 @@ class Simulator:
 
 
         animated_plot = animation.FuncAnimation(
-            self.visualization, self._update_trajectories, self.UAV.number_of_steps, fargs=(self.routes, trajectories), interval=20, repeat=False
+            self.visualization, self._update_trajectories, self.UAV.number_of_steps, fargs=(self.routes, trajectories), interval=100, repeat=False
         )
         # plt.gca().set_facecolor(self.color_manager.get_color('background'))
         plt.show()

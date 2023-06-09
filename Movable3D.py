@@ -70,3 +70,53 @@ class Movable3D:
         """
         stop_elevation_time = np.random.randint(0, int(self.number_of_steps/2))
         self.route[(stop_elevation_time + 1):, 2] = self.route[stop_elevation_time, 2]
+
+
+    def _set_linear_trajectory(self, start_point, end_point, velocity, duration, dt):
+        # Calculate the number of steps
+        num_steps = int(duration / dt)
+
+        # Calculate the displacement vector
+        displacement = end_point - start_point
+
+        # Calculate the normalized direction vector
+        direction = displacement / np.linalg.norm(displacement)
+
+        # Calculate the step size
+        step_size = velocity * dt
+
+        # Initialize arrays to store the UAV's position at each time step
+        position = np.zeros((num_steps, 3))
+
+        # Simulation loop
+        for i in range(num_steps):
+            # Calculate the position at the current time step
+            position[i] = start_point + direction * step_size * i
+
+        self.route = position
+        self.number_of_steps = num_steps
+
+        return position
+
+    def _simulate_orbit(self, center, radius, velocity, duration, dt):
+        # Calculate the number of steps
+        num_steps = int(duration / dt)
+
+        # Calculate the angular velocity
+        angular_velocity = velocity / radius
+
+        # Initialize arrays to store the UAV's position at each time step
+        position = np.zeros((num_steps, 3))
+
+        # Simulation loop
+        for i in range(num_steps):
+            # Calculate the current angle based on time
+            angle = angular_velocity * i * dt
+
+            # Calculate the position at the current time step
+            position[i] = center + np.array([radius * np.cos(angle), radius * np.sin(angle), 0])
+
+        self.route = position
+        self.number_of_steps = num_steps
+
+        return position

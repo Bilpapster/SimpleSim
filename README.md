@@ -1,5 +1,5 @@
 # `SimpleSim`
-A complete environment for ***executing***, ***visualizing*** and ***analyzing*** simulated flights of an Unmanned Aerial Vehicle (UAV) 
+A complete environment for ***executing***, ***visualizing*** and ***generating data*** of simulated flights of an Unmanned Aerial Vehicle (UAV) 
 chasing a ground target.
 
 <p align="center">
@@ -7,19 +7,21 @@ chasing a ground target.
 </p>
 
 
-## 0. Abstract
+## 0. Basic Information
 `SimpleSim` is originally developed by the author alongside with their participation in the [AIIA Laboratory](https://aiia.csd.auth.gr/) 
-at the Aristotle University of Thessaloniki (AUTh). The simulator is entirely written in `Python 3.9` programming language, making use of 
-the `numpy` and `matplotlib` libraries, in combination with some basic math and geometry, as well as a pinch of artistic effort.
+of the Aristotle University of Thessaloniki (AUTh). The simulator is written in `Python 3.9` programming language, making use of 
+the `numpy` and `matplotlib` libraries. Fundamental math and physics equations are used behind the scenes, in combination with a pinch of artistic effort.
 
 
 ## 1. How to use `SimpleSim`
-In order to use `SimpleSim`, you need to clone this repository and run the following code in the same directory:
-    from Simulator import Simulator
+In order to use `SimpleSim`, you need to clone the current repository and run the following code in the project directory:
+    
 ```python
+from Simulator import Simulator
+
 simulator = Simulator()
-run_data = simulator.get_run_data() # contains execution data for the UAV and the target
-simulator.visualize() # comment out in case you do not want execution visualization
+run_data = simulator.get_run_data() # contains execution data for the UAV and the target (for more see section 4)
+simulator.visualize()               # can be commented out, in case you do not want execution visualization
 ```
 
 

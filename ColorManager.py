@@ -25,16 +25,16 @@ class ColorManager():
         self.color_map['foreground'] = {'light': mcolors.CSS4_COLORS['black'],
                                         'dark': mcolors.CSS4_COLORS['white']}
 
-        self.color_map['UAV'] =    {'light': mcolors.CSS4_COLORS['darkorchid'],
+        self.color_map['UAV'] =    {'light': mcolors.CSS4_COLORS['royalblue'],
                                     'dark': mcolors.CSS4_COLORS['magenta']}
         
         self.color_map['UAV_ground_trace'] = {'light': mcolors.CSS4_COLORS['slategray'],
                                               'dark': mcolors.CSS4_COLORS['snow']}
 
-        self.color_map['target'] = {'light': mcolors.CSS4_COLORS['lime'],
+        self.color_map['target'] = {'light': mcolors.CSS4_COLORS['firebrick'],
                                     'dark': mcolors.CSS4_COLORS['greenyellow']}
         
-        self.color_map['UAV_camera_FOV'] = {'light': mcolors.CSS4_COLORS['royalblue'],
+        self.color_map['UAV_camera_FOV'] = {'light': mcolors.CSS4_COLORS['teal'],
                                             'dark': mcolors.CSS4_COLORS['cornflowerblue']}
         
     

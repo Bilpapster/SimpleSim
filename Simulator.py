@@ -39,7 +39,7 @@ class Simulator:
     """
 
     def __init__(self, visualizationEnabled=True, 
-                 UAV_camera_FOV_angle_degrees=80, UAV_camera_FOV_radius=3.,
+                 UAV_camera_FOV_angle_degrees=70, UAV_camera_FOV_radius=.3,
                  UAV_start_position=None, target_start_position=None,
                  theme='light') -> None:
         """
@@ -49,7 +49,7 @@ class Simulator:
         Args:
             visualizationEnabled          (bool, optional):         Defines whether the visualization is enabled or not for this environment. Defaults to True.
             UAV_camera_FOV_angle_degrees  (float, optional):        The angle (in degrees) that the UAV camera vision shapes with the horizontal axis. 
-                                                                    Defaults to 30°.
+                                                                    Defaults to 70°.
             UAV_camera_FOV_radius         (float, optional):        The radius of the UAV camera field of view (FOV). Defaults to 7.0.
             UAV_start_position            (array-like, optional):   The start position (x, y, z) of the UAV movement. Defaults to None, which leads to 
                                                                     Movable3D constructor default value.
@@ -78,9 +78,8 @@ class Simulator:
         """
         self.UAV = UAV() if UAV_start_position is None else UAV(start_position=UAV_start_position)
 
-        self.UAV._set_linear_trajectory(start_point = np.array([1, 1, 1]), end_point=np.array([50, 50, 50]), velocity=2.5, duration=100, dt=0.1)
-        # self.UAV._simulate_spiral_orbit(start_point = np.array([1, 1, 50]), end_point=np.array([500, 500, 50]), center=np.array([250, 250, 50]), duration=100, dt=0.1)
-            
+        # self.UAV._set_linear_trajectory(start_point = np.array([0, 0, 10]), end_point=np.array([25, 28, 14]), velocity=1.5, duration=100, dt=0.1)
+           
         self._initialize_UAV_ground_trace()
         self._initialize_UAV_camera_FOV()
 
@@ -118,6 +117,7 @@ class Simulator:
             self.UAV_camera_FOV_route[step, 1] += displacement_y
 
         self.UAV_camera_FOV_route[:, 2] = 0.
+
 
     def _calculate_fov_center(self, yaw, fov_angle):
         # Convert yaw angle to radians
@@ -172,7 +172,7 @@ class Simulator:
         self.plot_handler['target'] = {'color': self.color_manager.get_color('target'),
                                        'linestyle': ':',
                                        'label': 'target',
-                                       'marker':'X',
+                                       'marker':'x',
                                        'markersize': None,
                                        'alpha': 1}
 
@@ -184,7 +184,7 @@ class Simulator:
         self.plot_handler['UAV_camera_FOV'] = {'color': self.color_manager.get_color('UAV_camera_FOV'),
                                                'linestyle': ':',
                                                'label': 'UAV camera FOV center',
-                                               'alpha': 0.8}
+                                               'alpha': 0.5}
 
 
     def visualize(self) -> None:
@@ -230,7 +230,6 @@ class Simulator:
         animated_plot = animation.FuncAnimation(
             self.visualization, self._update_trajectories, self.UAV.number_of_steps, fargs=(self.routes, trajectories), interval=100, repeat=False
         )
-        # plt.gca().set_facecolor(self.color_manager.get_color('background'))
         plt.show()
 
 
@@ -318,19 +317,21 @@ class Simulator:
         target_y_rescaled = (self.target.route[current_number, 1] - self.UAV_camera_FOV_route[current_number, 1]) / self.UAV_camera_FOV_radius
         trajectories[-4][0].set_data(target_x_rescaled, target_y_rescaled)
 
-
-        # todo todo todo todo todo todo better
+        # updates the UAV trajectory trail (trajectories[-3])
         trajectories[-3].set_data(self.UAV.route[:(current_number-1), :2].T)
         trajectories[-3].set_3d_properties(self.UAV.route[:(current_number-1), 2])
 
+        # updates the target trajectory trail (trajectories[-2])
         trajectories[-2].set_data(self.target.route[:(current_number-1), :2].T)
         trajectories[-2].set_3d_properties(self.target.route[:(current_number-1), 2])
 
+        # sets up the ground trace trajectory trail (trajectories[-1])
         trajectories[-1].set_data(self.UAV_ground_trace_route[:(current_number-1), :2].T)
         trajectories[-1].set_3d_properties(self.UAV_ground_trace_route[:(current_number-1), 2])
 
-        self.ax.legend(loc='best')
-        self.ax2.legend(loc='best')
+        legend_location = 'lower left'
+        self.ax.legend(loc=legend_location)
+        self.ax2.legend(loc=legend_location)
         return trajectories
 
 
@@ -358,7 +359,7 @@ class Simulator:
                                                                                     between the target and the camera field of view center at every step
 
             - target (top level key)
-                - route                                     (ndarray): the exact coordinates (x, y, z) at every step of the target movement
+                - route                                                 (ndarray): the exact coordinates (x, y, z) at every step of the target movement
 
 
         Returns:
@@ -410,15 +411,18 @@ class Simulator:
         camera_target_euclidean_distance_from_FOV_center = []
         camera_target_manhattan_distance_from_FOV_center = []
 
-        for UAV_coordinates, FOV_center_coordinates in zip(self.target.route, self.UAV_camera_FOV_route):
-            UAV_coordinates = UAV_coordinates[:2]
+        for target_coordinates, FOV_center_coordinates in zip(self.target.route, self.UAV_camera_FOV_route):
+            # keep only the (x, y) coordinates of the points, since they are on the ground (z=0)
+            target_coordinates = target_coordinates[:2]
             FOV_center_coordinates = FOV_center_coordinates[:2]
 
-            euclidean_distance = utils.compute_euclidean_distance(UAV_coordinates, FOV_center_coordinates)
+            # compute the Euclidean distance and decide whether is a miss or a hit
+            euclidean_distance = utils.compute_euclidean_distance(target_coordinates, FOV_center_coordinates)
             camera_target_euclidean_distance_from_FOV_center.append(euclidean_distance)
             camera_target_miss_hits.append(True if euclidean_distance <= self.UAV_camera_FOV_radius else False)
 
-            manhattan_distance = utils.compute_manhattan_distance(UAV_coordinates, FOV_center_coordinates)
+            # compute the Manhattan distance
+            manhattan_distance = utils.compute_manhattan_distance(target_coordinates, FOV_center_coordinates)
             camera_target_manhattan_distance_from_FOV_center.append(manhattan_distance)
 
 

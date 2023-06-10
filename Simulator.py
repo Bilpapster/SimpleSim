@@ -78,8 +78,8 @@ class Simulator:
         """
         self.UAV = UAV() if UAV_start_position is None else UAV(start_position=UAV_start_position)
 
-        # self.UAV._set_linear_trajectory(start_point = np.array([1, 1, 1]), end_point=np.array([50, 50, 50]), velocity=3.0, duration=100, dt=0.1)
-        # self.UAV._simulate_orbit(center = np.array([10, 10, 10]), radius=10, velocity=3.0, duration=100, dt=0.1)
+        self.UAV._set_linear_trajectory(start_point = np.array([1, 1, 1]), end_point=np.array([50, 50, 50]), velocity=2.5, duration=100, dt=0.1)
+        # self.UAV._simulate_spiral_orbit(start_point = np.array([1, 1, 50]), end_point=np.array([500, 500, 50]), center=np.array([250, 250, 50]), duration=100, dt=0.1)
             
         self._initialize_UAV_ground_trace()
         self._initialize_UAV_camera_FOV()
@@ -376,7 +376,7 @@ class Simulator:
         Returns:
             dict: a dictionary that contains the data related to the UAV object of the current simulated run.
         """
-        camera_target_miss_hits, camera_target_distance_from_FOV_center = self._compute_euclidean_distances()
+        camera_target_miss_hits, camera_target_euclidean_distance_from_FOV_center, camera_target_manhattan_distance_from_FOV_center = self._compute_distances()
 
         return {
             'route': self.UAV.route.copy(),
@@ -387,11 +387,12 @@ class Simulator:
             'camera_FOV_radius': self.UAV_camera_FOV_radius,
             'camera_FOV_angle_degrees': self.UAV_camera_FOV_angle_degrees,
             'camera_target_miss_hits': np.array(camera_target_miss_hits),
-            'camera_target_distance_from_FOV_center': np.array(camera_target_distance_from_FOV_center)
+            'camera_target_euclidean_distance_from_FOV_center': np.array(camera_target_euclidean_distance_from_FOV_center),
+            'camera_target_manhattan_distance_from_FOV_center': np.array(camera_target_manhattan_distance_from_FOV_center)
         }
     
 
-    def _compute_euclidean_distances(self):
+    def _compute_distances(self):
         """
         (for inside-class use only) Computes the distance of the FOV center from the target at every step of the simulated flight and 
         constructs an numpy array containing this data, that is returned. It also returns a miss-hit array 
@@ -404,16 +405,22 @@ class Simulator:
                      and the target at every step of the simulated run
         """
         camera_target_miss_hits = []
-        camera_target_distance_from_FOV_center = []
+        camera_target_euclidean_distance_from_FOV_center = []
+        camera_target_manhattan_distance_from_FOV_center = []
 
-        for UAV_coordinates, FOV_center_coordinates in zip(self.UAV.route, self.UAV_camera_FOV_route):
+        for UAV_coordinates, FOV_center_coordinates in zip(self.target.route, self.UAV_camera_FOV_route):
             UAV_coordinates = UAV_coordinates[:2]
             FOV_center_coordinates = FOV_center_coordinates[:2]
+
             euclidean_distance = utils.compute_euclidean_distance(UAV_coordinates, FOV_center_coordinates)
-            camera_target_distance_from_FOV_center.append(euclidean_distance)
+            camera_target_euclidean_distance_from_FOV_center.append(euclidean_distance)
             camera_target_miss_hits.append(True if euclidean_distance <= self.UAV_camera_FOV_radius else False)
 
-        return camera_target_miss_hits, camera_target_distance_from_FOV_center
+            manhattan_distance = utils.compute_manhattan_distance(UAV_coordinates, FOV_center_coordinates)
+            camera_target_manhattan_distance_from_FOV_center.append(manhattan_distance)
+
+
+        return camera_target_miss_hits, camera_target_euclidean_distance_from_FOV_center, camera_target_manhattan_distance_from_FOV_center
     
 
     def _construct_run_data_target(self) -> dict:

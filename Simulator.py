@@ -340,20 +340,22 @@ class Simulator:
         The returned dictionary is 2-dimensional. The first dimension values are dictionaries themselves that contain
         as values the actual data. In particular, the dictionary has the following structure:
             - UAV (top level key)
-                - route                                     (ndarray):  the exact coordinates (x, y, z) at every step of the UAV flight
-                - min_height                                (float):    the minimum height the UAV reached during flight
-                - max_height                                (float):    the maximum height the UAV reached during flight
-                - ground_trace_route                        (ndarray):  the exact coordinates (x, y, z) of the ground trace of the UAV 
-                                                                        at every step of its flight
-                - camera_FOV_center                         (ndarray):  the exact coordinates (x, y, z) of the UAV camera field of view 
-                                                                        center at every step of its flight
-                - camera_FOV_radius                         (float):    the radius of the UAV camera field of view center
-                - camera_FOV_angle_degrees                  (float):    the angle (in degrees) that the UAV camera vision shapes with 
-                                                                        the horizontal axis
-                - camera_target_miss_hits                   (ndarray):  contains number_of_steps boolean values (True -> target inside 
-                                                                        FOV at step i, False -> target outside FOV at step 1)
-                - camera_target_distance_form_FOV_center    (ndarray):  contains number_of_steps float values that represent the distance 
-                                                                        between the target and the camera field of view center at every step
+                - route                                                 (ndarray):  the exact coordinates (x, y, z) at every step of the UAV flight
+                - min_height                                            (float):    the minimum height the UAV reached during flight
+                - max_height                                            (float):    the maximum height the UAV reached during flight
+                - ground_trace_route                                    (ndarray):  the exact coordinates (x, y, z) of the ground trace of the UAV 
+                                                                                    at every step of its flight
+                - camera_FOV_center                                     (ndarray):  the exact coordinates (x, y, z) of the UAV camera field of view 
+                                                                                    center at every step of its flight
+                - camera_FOV_radius                                     (float):    the radius of the UAV camera field of view center
+                - camera_FOV_angle_degrees                              (float):    the angle (in degrees) that the UAV camera vision shapes with 
+                                                                                    the horizontal axis
+                - camera_target_miss_hits                               (ndarray):  contains number_of_steps boolean values (True -> target inside 
+                                                                                    FOV at step i, False -> target outside FOV at step 1)
+                - camera_target_euclidean_distance_form_FOV_center      (ndarray):  contains number_of_steps float values that represent the Euclidean distance 
+                                                                                    between the target and the camera field of view center at every step
+                - camera_target_manhattan_distance_form_FOV_center      (ndarray):  contains number_of_steps float values that represent the Manhattan distance 
+                                                                                    between the target and the camera field of view center at every step
 
             - target (top level key)
                 - route                                     (ndarray): the exact coordinates (x, y, z) at every step of the target movement

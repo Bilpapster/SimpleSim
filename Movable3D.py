@@ -95,8 +95,8 @@ class Movable3D:
 
         self.route = position
         self.number_of_steps = num_steps
-
         return position
+
 
     def _simulate_orbit(self, center, radius, velocity, duration, dt):
         # Calculate the number of steps
@@ -115,6 +115,43 @@ class Movable3D:
 
             # Calculate the position at the current time step
             position[i] = center + np.array([radius * np.cos(angle), radius * np.sin(angle), 0])
+
+        self.route = position
+        self.number_of_steps = num_steps
+        return position
+        
+    
+    def _simulate_spiral_orbit(self, start_point, end_point, center, duration, dt):
+        # Calculate the number of steps
+        num_steps = int(duration / dt)
+
+        # Calculate the displacement vectors
+        displacement_start = start_point - center
+        displacement_end = end_point - center
+
+        # Calculate the radii of the circular orbits
+        radius_start = np.linalg.norm(displacement_start)
+        radius_end = np.linalg.norm(displacement_end)
+
+        # Calculate the angular velocities
+        angular_velocity_start = np.linalg.norm(np.cross(displacement_start, np.array([0, 0, 1]))) / radius_start
+        angular_velocity_end = np.linalg.norm(np.cross(displacement_end, np.array([0, 0, 1]))) / radius_end
+
+        # Initialize arrays to store the UAV's position at each time step
+        position = np.zeros((num_steps, 3))
+
+        # Simulation loop
+        for i in range(num_steps):
+            # Calculate the current angles based on time
+            angle_start = angular_velocity_start * i * dt
+            angle_end = angular_velocity_end * i * dt
+
+            # Calculate the positions at the current time step
+            position_start = center + np.array([radius_start * np.cos(angle_start), radius_start * np.sin(angle_start), 0])
+            position_end = center + np.array([radius_end * np.cos(angle_end), radius_end * np.sin(angle_end), 0])
+
+            # Interpolate between the start and end positions
+            position[i] = (1 - i / num_steps) * position_start + (i / num_steps) * position_end
 
         self.route = position
         self.number_of_steps = num_steps

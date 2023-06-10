@@ -16,7 +16,7 @@ class Movable3D:
     """
 
     def __init__(self, 
-                 number_of_steps=1000, 
+                 number_of_steps=300, 
                  max_step=0.5, 
                  is_ground_movable=False, 
                  start_position = np.zeros(3)) -> None:
@@ -118,7 +118,6 @@ class Movable3D:
 
         self.route = position
         self.number_of_steps = num_steps
-        return position
         
     
     def _simulate_spiral_orbit(self, start_point, end_point, center, duration, dt):
@@ -155,5 +154,3 @@ class Movable3D:
 
         self.route = position
         self.number_of_steps = num_steps
-
-        return position

@@ -19,7 +19,10 @@ class Movable3D:
                  number_of_steps=300, 
                  max_step=0.5, 
                  is_ground_movable=False, 
-                 start_position = np.zeros(3)) -> None:
+                 start_position = np.zeros(3),
+                 check_points=None,
+                 velocities=None,
+                 dt=None) -> None:
         """
         The constructor for Movable3D class.
 
@@ -34,8 +37,13 @@ class Movable3D:
         self.is_ground_movable = is_ground_movable
         self.start_position = start_position
         self.steps = None
-        self.route = None
-        self._initialize_random_route()
+        # self._initialize_random_route()
+
+        self.check_points = check_points
+        self.velocities = velocities
+        self.dt = dt
+        self.route = np.zeros((1, 3)) + self.check_points[0]
+        self._set_linear_trajectory1()
         
 
     def _initialize_random_route(self) -> None:
@@ -45,6 +53,7 @@ class Movable3D:
         self._initialize_random_steps()
         self._insert_random_turns()
         self.route = self.start_position + np.cumsum(self.steps, axis=0)
+
 
     def _initialize_random_steps(self) -> None:
         """
@@ -79,6 +88,28 @@ class Movable3D:
         self.route[(stop_elevation_time + 1):, 2] = self.route[stop_elevation_time, 2]
 
 
+    def _set_linear_trajectory1(self):
+        self.number_of_steps = 0
+        previous_point = self.check_points[0]
+
+        for check_point, velocity in zip(self.check_points[1:], self.velocities):
+            displacement = check_point - previous_point
+            distance = np.linalg.norm(displacement)
+            duration=distance / velocity
+            num_steps = int(duration / self.dt)
+            direction = displacement / np.linalg.norm(displacement)
+            step_size = velocity * self.dt
+            trajectory_segment = np.zeros((num_steps, 3))
+
+            for step in range(num_steps):
+                trajectory_segment[step] = previous_point + direction * step_size * step
+
+            previous_point = check_point
+            self.number_of_steps += num_steps
+
+            self.route = np.concatenate((self.route, trajectory_segment), axis=0)
+
+
     def _set_linear_trajectory(self, start_point, end_point, velocity, duration, dt):
         # Calculate the number of steps
         num_steps = int(duration / dt)
@@ -100,8 +131,8 @@ class Movable3D:
             # Calculate the position at the current time step
             position[i] = start_point + direction * step_size * i
 
-        self.route = position
-        self.number_of_steps = num_steps
+        # self.route = position
+        self.number_of_steps += num_steps
         return position
 
 

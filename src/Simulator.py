@@ -39,7 +39,7 @@ class Simulator:
     """
 
     def __init__(self, visualizationEnabled=True, 
-                 UAV_camera_FOV_angle_degrees=70, UAV_camera_FOV_radius=.3,
+                 UAV_camera_FOV_angle_degrees=70, UAV_camera_FOV_radius=1.,
                  UAV_start_position=None, target_start_position=None,
                  theme='light') -> None:
         """
@@ -50,7 +50,7 @@ class Simulator:
             visualizationEnabled          (bool, optional):         Defines whether the visualization is enabled or not for this environment. Defaults to True.
             UAV_camera_FOV_angle_degrees  (float, optional):        The angle (in degrees) that the UAV camera vision shapes with the horizontal axis. 
                                                                     Defaults to 70°.
-            UAV_camera_FOV_radius         (float, optional):        The radius of the UAV camera field of view (FOV). Defaults to 7.0.
+            UAV_camera_FOV_radius         (float, optional):        The radius of the UAV camera field of view (FOV). Defaults to 1.0.
             UAV_start_position            (array-like, optional):   The start position (x, y, z) of the UAV movement. Defaults to None, which leads to 
                                                                     Movable3D constructor default value.
             target_start_position         (array-like, optional):   The start position (x, y, z) of the ground target. Defaults to None, which leads to
@@ -237,7 +237,7 @@ class Simulator:
 
     def _set_up_axis(self) -> None:
         """
-        (for inside-class use only) Sets up the axis for the animated, 3-dimensional plot.
+        (for inside-class use only) Sets up the axis for the animated, 3-dimensional plot and the camera FOV plot.
         """
         self.visualization = plt.figure(figsize=(20, 20), facecolor=self.color_manager.get_color('background'))
         self.visualization.patch.set_facecolor(self.color_manager.get_color('background'))
@@ -250,14 +250,28 @@ class Simulator:
         self.ax.set(zlim3d=(0, self.UAV.route[-1, 2] + 10), zlabel='Z')
         # self.ax.set_axis_off()
         self.ax.set_facecolor(self.color_manager.get_color('background'))
-        self.ax.set_title(f'SimpleSim v{self.version}', color=self.color_manager.get_color('foreground'), fontsize=20)
+        self.ax.set_title('Live trajectories', fontsize=12)
 
         self.ax2 = self.visualization.add_subplot(122)
-        self.ax2.add_patch(Circle((0,0), 1, color= self.color_manager.get_color('UAV_camera_FOV'), alpha=0.5, label="camera FOV"))
+
+        self.ax2.plot(np.linspace(-1., 1., 10), np.zeros(10), color=self.color_manager.get_color('foreground'), alpha = 0.1, linewidth=1.5, label='_y=0')
+        self.ax2.plot(np.zeros(10), np.linspace(-1., 1., 10), color=self.color_manager.get_color('foreground'), alpha = 0.1, linewidth=1.5, label='_x=0')
+
+        x = np.linspace(-1./np.sqrt(2), 1./np.sqrt(2), 10)
+        self.ax2.plot(x, x, color=self.color_manager.get_color('foreground'), alpha = 0.1, linewidth=1.5, label='_y=x')
+        self.ax2.plot(x, -x, color=self.color_manager.get_color('foreground'), alpha = 0.1, linewidth=1.5, label='_y=-x')
+
+        self.ax2.add_patch(Circle(xy=(0, 0), radius=1/3, edgecolor=self.color_manager.get_color('foreground'), linewidth=1.5, alpha=0.1, facecolor='None', label='_target-like circle 1'))
+        self.ax2.add_patch(Circle(xy=(0, 0), radius=2/3, edgecolor=self.color_manager.get_color('foreground'), linewidth=1.5, alpha=0.1, facecolor='None', label='_target-like circle 2'))
+        self.ax2.add_patch(Circle(xy=(0, 0), radius=1. , color= self.color_manager.get_color('UAV_camera_FOV'), alpha=0.3, label="camera FOV"))
+
+
         self.ax2.set(xlim=(-1.5, 1.5), ylim=(-1.5, 1.5))
         self.ax2.set_aspect(1.0/self.ax2.get_data_ratio(), adjustable='box')
         self.ax2.set_axis_off()
-        self.ax2.set_title("UAV camera FOV", color=self.color_manager.get_color('foreground'), fontsize=20)
+        self.ax2.set_title("UAV camera FOV", color=self.color_manager.get_color('foreground'), fontsize=12)
+
+        self.visualization.suptitle(f'SimpleSim v{self.version}', color=self.color_manager.get_color('foreground'), fontsize=20)
 
 
     def _set_up_trajectories(self) -> list:
@@ -313,7 +327,7 @@ class Simulator:
                                 alpha=0.5)
         trajectories[-5] = self.ax.add_patch(UAV_camera_FOV)
         art3d.pathpatch_2d_to_3d(UAV_camera_FOV, z=0.)
-        # plt.savefig('Test/' + str(current_number) + '.png')
+        # plt.savefig('../skata/Figures/figure ' + str(current_number) + '.png')
 
         target_x_rescaled = (self.target.route[current_number, 0] - self.UAV_camera_FOV_route[current_number, 0]) / self.UAV_camera_FOV_radius   
         target_y_rescaled = (self.target.route[current_number, 1] - self.UAV_camera_FOV_route[current_number, 1]) / self.UAV_camera_FOV_radius

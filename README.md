@@ -3,7 +3,7 @@ A complete environment for ***executing***, ***visualizing*** and ***generating 
 chasing a ground target.
 
 <p align="center">
-    <img align="middle" src="https://github.com/Bilpapster/SimpleSim/blob/main/Repository%20resources/animation.gif" height="600" alt="SimpleSim animation example gif"/>
+    <img align="middle" src="https://github.com/Bilpapster/SimpleSim/blob/main/Repository%20resources/animation.gif" alt="SimpleSim animation example gif"/>
 </p>
 
 

@@ -35,18 +35,25 @@ class Movable3D:
         self.start_position = start_position
         self.steps = None
         self.route = None
-        self._initialize_route()
+        self._initialize_random_route()
         
 
-    def _initialize_route(self) -> None:
+    def _initialize_random_route(self) -> None:
         """
         (inside-class use only) Initializes the route of the movable object, based on the steps array. 
         """
-        self._insert_turns()
+        self._initialize_random_steps()
+        self._insert_random_turns()
         self.route = self.start_position + np.cumsum(self.steps, axis=0)
+
+    def _initialize_random_steps(self) -> None:
+        """
+        (inside-class use only) Initializes the steps of the movable object, using a uniform distribution. 
+        """
+        self.steps = np.random.uniform(0.0, self.max_step, size=(self.number_of_steps, 3))
     
 
-    def _insert_turns(self) -> None:
+    def _insert_random_turns(self) -> None:
         """
         (inside-class use only) Randomly inserts 90-degrees turns (left and right) in the route.
         """
@@ -64,7 +71,7 @@ class Movable3D:
             self.steps[turn_start_time:(turn_start_time + turn_duration), 2] = 0.
 
 
-    def _set_maximum_height(self) -> None:
+    def _set_random_maximum_height(self) -> None:
         """
         (inside-class use only) Defines the maximum height the movable object can reach during movement.
         """

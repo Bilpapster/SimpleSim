@@ -56,7 +56,7 @@ class Simulator:
                                                                     Movable3D constructor default value.
             theme                         (str, optional):          The theme (see ColorManager class for available options). Defaults to 'light'.
         """
-        self.version = '1.7'
+        self.version = '1.8'
 
         self.visualizationEnabled = visualizationEnabled
         self.UAV_camera_FOV_angle_degrees = UAV_camera_FOV_angle_degrees

@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import matplotlib.colors as mcolors
 import mpl_toolkits.mplot3d.art3d as art3d
 from matplotlib.patches import Circle
 from ColorManager import ColorManager
@@ -78,7 +77,18 @@ class Simulator:
         Args:
             UAV_start_position (array-like): The start position of the UAV object movement.
         """
-        self.UAV = UAV() if UAV_start_position is None else UAV(start_position=UAV_start_position)
+        check_points = [np.array([0, 0, 0]), 
+                        np.array([5, 12, 20]),
+                        np.array([10, 5, 20]),
+                        np.array([13, 20, 25]),
+                        np.array([18, 13, 25]),
+                        np.array([23, 21, 25])]   
+
+        velocities = [2., 3., 4., 2., 1.5]   
+        dt = 0.1
+
+        # temporarily, readability is to be enhanced soon! 
+        self.UAV = UAV(check_points=check_points, velocities=velocities, dt=dt) if UAV_start_position is None else UAV(start_position=UAV_start_position, check_points=check_points, velocities=velocities, dt=dt)
 
         # self.UAV._set_linear_trajectory(start_point = np.array([0, 0, 10]), end_point=np.array([25, 28, 14]), velocity=1.5, duration=100, dt=0.1)
            
@@ -93,7 +103,18 @@ class Simulator:
         Args:
             target_start_position (array-like): The start position of the ground target object movement.
         """
-        self.target = GroundTarget() if target_start_position is None else GroundTarget(start_position=target_start_position)
+
+        check_points = [np.array([0, 0, 0]), 
+                        np.array([9, 13, 0]),
+                        np.array([20, 19, 0]),
+                        np.array([10, 25, 0]),
+                        np.array([18, 10, 0]),
+                        np.array([30, 30, 0])]   
+
+        velocities = [3., 2., 2., 5., 1.]   
+        dt = 0.1
+        # temporarily, readability is to be enhanced soon!
+        self.target = GroundTarget(check_points=check_points, velocities=velocities, dt=dt) if target_start_position is None else GroundTarget(start_position=target_start_position, check_points=check_points, velocities=velocities, dt=dt)
 
 
     def _initialize_UAV_ground_trace(self) -> None:

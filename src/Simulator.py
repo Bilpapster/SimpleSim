@@ -57,6 +57,8 @@ class Simulator:
                                                                     Movable3D constructor default value.
             theme                         (str, optional):          The theme (see ColorManager class for available options). Defaults to 'light'.
         """
+        self.version = '1.7'
+
         self.visualizationEnabled = visualizationEnabled
         self.UAV_camera_FOV_angle_degrees = UAV_camera_FOV_angle_degrees
         self.UAV_camera_FOV_radius = UAV_camera_FOV_radius
@@ -248,7 +250,7 @@ class Simulator:
         self.ax.set(zlim3d=(0, self.UAV.route[-1, 2] + 10), zlabel='Z')
         # self.ax.set_axis_off()
         self.ax.set_facecolor(self.color_manager.get_color('background'))
-        self.ax.set_title('SimpleSim v1.6', color=self.color_manager.get_color('foreground'), fontsize=20)
+        self.ax.set_title(f'SimpleSim v{self.version}', color=self.color_manager.get_color('foreground'), fontsize=20)
 
         self.ax2 = self.visualization.add_subplot(122)
         self.ax2.add_patch(Circle((0,0), 1, color= self.color_manager.get_color('UAV_camera_FOV'), alpha=0.5, label="camera FOV"))

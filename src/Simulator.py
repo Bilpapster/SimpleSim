@@ -85,12 +85,12 @@ class Simulator:
                         np.array([23, 21, 25])]   
 
         velocities = [2., 3., 4., 2., 1.5]   
-        dt = 0.1
+        d_t = 0.1
 
         # temporarily, readability is to be enhanced soon! 
-        self.UAV = UAV(check_points=check_points, velocities=velocities, dt=dt) if UAV_start_position is None else UAV(start_position=UAV_start_position, check_points=check_points, velocities=velocities, dt=dt)
+        self.UAV = UAV(check_points=check_points, velocities=velocities, d_t=d_t) if UAV_start_position is None else UAV(start_position=UAV_start_position, check_points=check_points, velocities=velocities, d_t=d_t)
 
-        # self.UAV._set_linear_trajectory(start_point = np.array([0, 0, 10]), end_point=np.array([25, 28, 14]), velocity=1.5, duration=100, dt=0.1)
+        # self.UAV._set_linear_trajectory(start_point = np.array([0, 0, 10]), end_point=np.array([25, 28, 14]), velocity=1.5, duration=100, d_t=0.1)
            
         self._initialize_UAV_ground_trace()
         self._initialize_UAV_camera_FOV()
@@ -112,9 +112,9 @@ class Simulator:
                         np.array([30, 30, 0])]   
 
         velocities = [3., 2., 2., 5., 1.]   
-        dt = 0.1
+        d_t = 0.1
         # temporarily, readability is to be enhanced soon!
-        self.target = GroundTarget(check_points=check_points, velocities=velocities, dt=dt) if target_start_position is None else GroundTarget(start_position=target_start_position, check_points=check_points, velocities=velocities, dt=dt)
+        self.target = GroundTarget(check_points=check_points, velocities=velocities, d_t=d_t) if target_start_position is None else GroundTarget(start_position=target_start_position, check_points=check_points, velocities=velocities, d_t=d_t)
 
 
     def _initialize_UAV_ground_trace(self) -> None:

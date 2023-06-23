@@ -15,14 +15,14 @@ class Movable3D:
                                             of the object's movement
     """
 
-    def __init__(self, 
+    def __init__(self,
                  number_of_steps=300, 
                  max_step=0.5, 
                  is_ground_movable=False, 
                  start_position = np.zeros(3),
                  check_points=None,
                  velocities=None,
-                 dt=None) -> None:
+                 d_t=None) -> None:
         """
         The constructor for Movable3D class.
 
@@ -41,10 +41,10 @@ class Movable3D:
 
         self.check_points = check_points
         self.velocities = velocities
-        self.dt = dt
+        self.d_t = d_t
         self.route = np.zeros((1, 3)) + self.check_points[0]
         self._set_linear_trajectory1()
-        
+
 
     def _initialize_random_route(self) -> None:
         """
@@ -60,14 +60,14 @@ class Movable3D:
         (inside-class use only) Initializes the steps of the movable object, using a uniform distribution. 
         """
         self.steps = np.random.uniform(0.0, self.max_step, size=(self.number_of_steps, 3))
-    
+
 
     def _insert_random_turns(self) -> None:
         """
         (inside-class use only) Randomly inserts 90-degrees turns (left and right) in the route.
         """
         number_of_turns = np.random.randint(0, int(self.number_of_steps/100) if self.number_of_steps >= 100 else 0)
-        
+
         if number_of_turns == 0:
             return
 
@@ -96,9 +96,9 @@ class Movable3D:
             displacement = check_point - previous_point
             distance = np.linalg.norm(displacement)
             duration=distance / velocity
-            num_steps = int(duration / self.dt)
+            num_steps = int(duration / self.d_t)
             direction = displacement / np.linalg.norm(displacement)
-            step_size = velocity * self.dt
+            step_size = velocity * self.d_t
             trajectory_segment = np.zeros((num_steps, 3))
 
             for step in range(num_steps):
@@ -110,9 +110,9 @@ class Movable3D:
             self.route = np.concatenate((self.route, trajectory_segment), axis=0)
 
 
-    def _set_linear_trajectory(self, start_point, end_point, velocity, duration, dt):
+    def _set_linear_trajectory(self, start_point, end_point, velocity, duration, d_t):
         # Calculate the number of steps
-        num_steps = int(duration / dt)
+        num_steps = int(duration / d_t)
 
         # Calculate the displacement vector
         displacement = end_point - start_point
@@ -121,7 +121,7 @@ class Movable3D:
         direction = displacement / np.linalg.norm(displacement)
 
         # Calculate the step size
-        step_size = velocity * dt
+        step_size = velocity * d_t
 
         # Initialize arrays to store the UAV's position at each time step
         position = np.zeros((num_steps, 3))
@@ -136,9 +136,9 @@ class Movable3D:
         return position
 
 
-    def _simulate_orbit(self, center, radius, velocity, duration, dt):
+    def _simulate_orbit(self, center, radius, velocity, duration, d_t):
         # Calculate the number of steps
-        num_steps = int(duration / dt)
+        num_steps = int(duration / d_t)
 
         # Calculate the angular velocity
         angular_velocity = velocity / radius
@@ -149,18 +149,18 @@ class Movable3D:
         # Simulation loop
         for i in range(num_steps):
             # Calculate the current angle based on time
-            angle = angular_velocity * i * dt
+            angle = angular_velocity * i * d_t
 
             # Calculate the position at the current time step
             position[i] = center + np.array([radius * np.cos(angle), radius * np.sin(angle), 0])
 
         self.route = position
         self.number_of_steps = num_steps
-        
-    
-    def _simulate_spiral_orbit(self, start_point, end_point, center, duration, dt):
+
+
+    def _simulate_spiral_orbit(self, start_point, end_point, center, duration, d_t):
         # Calculate the number of steps
-        num_steps = int(duration / dt)
+        num_steps = int(duration / d_t)
 
         # Calculate the displacement vectors
         displacement_start = start_point - center
@@ -180,8 +180,8 @@ class Movable3D:
         # Simulation loop
         for i in range(num_steps):
             # Calculate the current angles based on time
-            angle_start = angular_velocity_start * i * dt
-            angle_end = angular_velocity_end * i * dt
+            angle_start = angular_velocity_start * i * d_t
+            angle_end = angular_velocity_end * i * d_t
 
             # Calculate the positions at the current time step
             position_start = center + np.array([radius_start * np.cos(angle_start), radius_start * np.sin(angle_start), 0])
